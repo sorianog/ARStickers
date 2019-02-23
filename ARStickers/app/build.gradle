@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.ar.sceneform.plugin'
 
 android {
     compileSdkVersion 28
@@ -38,3 +39,24 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.7.0'
 }
+
+
+sceneform.asset('sampledata/models/andy.obj',
+        'default',
+        'sampledata/models/andy.sfa',
+        'src/main/assets/andy')
+
+sceneform.asset('sampledata/models/Cabin.obj',
+        'default',
+        'sampledata/models/Cabin.sfa',
+        'src/main/assets/Cabin')
+
+sceneform.asset('sampledata/models/House.obj',
+        'default',
+        'sampledata/models/House.sfa',
+        'src/main/assets/House')
+
+sceneform.asset('sampledata/models/igloo.obj',
+        'default',
+        'sampledata/models/igloo.sfa',
+        'src/main/assets/igloo')
