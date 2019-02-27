@@ -1,15 +1,20 @@
 package com.sorianog.arstickers
 
 import android.graphics.Point
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.TrackingState
+import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -34,6 +39,8 @@ class MainActivity : AppCompatActivity() {
             fragment.onUpdate(frameTime)
             onUpdate()
         }
+
+        initializeGallery()
     }
 
     private fun onUpdate() {
@@ -105,5 +112,45 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun initializeGallery() {
+        val gallery : LinearLayout = findViewById(R.id.gallery_layout)
+
+        val andy = ImageView(this)
+        andy.setImageResource(R.drawable.droid_thumb)
+        andy.contentDescription = "andy"
+        andy.setOnClickListener { view -> addObject(Uri.parse("andy.sfb")) }
+        gallery.addView(andy)
+
+        val cabin = ImageView(this)
+        cabin.setImageResource(R.drawable.cabin_thumb)
+        cabin.contentDescription = "cabin"
+        cabin.setOnClickListener { view -> addObject(Uri.parse("Cabin.sfb")) }
+        gallery.addView(cabin)
+
+        val house = ImageView(this)
+        house.setImageResource(R.drawable.house_thumb)
+        house.contentDescription = "house"
+        house.setOnClickListener { view -> addObject(Uri.parse("House.sfb")) }
+        gallery.addView(house)
+
+        val igloo = ImageView(this)
+        igloo.setImageResource(R.drawable.igloo_thumb)
+        igloo.contentDescription = "igloo"
+        igloo.setOnClickListener { view -> addObject(Uri.parse("igloo.sfb")) }
+        gallery.addView(igloo)
+    }
+
+    private fun addObject(model: Uri) {
+
+    }
+
+    private fun placeObject(fragment: ArFragment, anchor: Anchor, model: Uri) {
+
+    }
+
+    private fun addNodeToScene(fragment: ArFragment, anchor: Anchor, renderable: Renderable) {
+
     }
 }
