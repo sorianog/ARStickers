@@ -4,6 +4,7 @@ import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -14,8 +15,11 @@ import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.TrackingState
+import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
+import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -143,14 +147,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addObject(model: Uri) {
+        val frame = fragment.arSceneView.arFrame
+        val pt : Point = getScreenCenter()
+        val hits : List<HitResult>
 
+        if (frame != null) {
+            hits = frame.hitTest(pt.x.toFloat(), pt.y.toFloat())
+
+            for (hit in hits) {
+                val trackable = hit.trackable
+                if (trackable is Plane && trackable.isPoseInPolygon(hit.hitPose)) {
+                    placeObject(fragment, hit.createAnchor(), model)
+                }
+            }
+        }
     }
 
     private fun placeObject(fragment: ArFragment, anchor: Anchor, model: Uri) {
-
+        val renderableFuture =
+            ModelRenderable.builder()
+                .setSource(fragment.context, model)
+                .build()
+                .thenAccept { renderable -> addNodeToScene(fragment, anchor, renderable) }
+                .exceptionally { throwable ->
+                    val builder = AlertDialog.Builder(this)
+                    builder.setMessage(throwable.message)
+                        .setTitle("Codelab error!")
+                    val dialog = builder.create()
+                    dialog.show()
+                    null
+                };
     }
 
     private fun addNodeToScene(fragment: ArFragment, anchor: Anchor, renderable: Renderable) {
+        val anchorNode = AnchorNode(anchor)
+        val node = TransformableNode(fragment.transformationSystem)
 
+        node.renderable = renderable
+        node.setParent(anchorNode)
+        fragment.arSceneView.scene.addChild(node)
+        node.select()
     }
 }
