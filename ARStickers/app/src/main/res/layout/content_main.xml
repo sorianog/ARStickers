@@ -10,7 +10,7 @@
 
     <fragment
             android:id="@+id/sceneform_fragment"
-            android:name="com.google.ar.sceneform.ux.ArFragment"
+            android:name="com.sorianog.arstickers.WritingArFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toTopOf="parent"
