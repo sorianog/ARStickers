@@ -1,15 +1,7 @@
 package com.sorianog.arstickers
 
 import android.Manifest
-import android.graphics.Bitmap
-import android.os.Environment
 import com.google.ar.sceneform.ux.ArFragment
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 class WritingArFragment : ArFragment() {
 
@@ -24,29 +16,5 @@ class WritingArFragment : ArFragment() {
         }
 
         return additionalPermissions
-    }
-
-    private fun generateFilename(): String {
-        val date = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
-        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath
-        return dir + File.separator + "Sceneform/" + date + "_screenshot.jpg";
-    }
-
-    private fun saveBitmapToDisk(bitmap: Bitmap, fileName: String) {
-        val out = File(fileName)
-        if (!out.parentFile.exists()) {
-            out.parentFile.mkdirs()
-        }
-        try {
-            val outputStream = FileOutputStream(fileName)
-            val outputData = ByteArrayOutputStream()
-
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputData)
-            outputData.writeTo(outputStream)
-            outputStream.flush()
-            outputStream.close()
-        } catch (ex: IOException) {
-            throw IOException("Failed to save bitmap to disk", ex)
-        }
     }
 }

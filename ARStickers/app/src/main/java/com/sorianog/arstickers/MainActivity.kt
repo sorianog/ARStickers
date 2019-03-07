@@ -1,16 +1,24 @@
 package com.sorianog.arstickers
 
+import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.HandlerThread
 import android.support.design.widget.Snackbar
+import android.support.v4.content.FileProvider
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.PixelCopy
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
@@ -21,6 +29,12 @@ import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var fragment: ArFragment
@@ -34,8 +48,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            takePhoto()
         }
 
         fragment = supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as ArFragment
@@ -187,5 +200,63 @@ class MainActivity : AppCompatActivity() {
         node.setParent(anchorNode)
         fragment.arSceneView.scene.addChild(node)
         node.select()
+    }
+
+    private fun generateFilename(): String {
+        val date = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
+        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath
+        return dir + File.separator + "Sceneform/" + date + "_screenshot.jpg";
+    }
+
+    private fun saveBitmapToDisk(bitmap: Bitmap, fileName: String) {
+        val out = File(fileName)
+        if (!out.parentFile.exists()) {
+            out.parentFile.mkdirs()
+        }
+        try {
+            val outputStream = FileOutputStream(fileName)
+            val outputData = ByteArrayOutputStream()
+
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputData)
+            outputData.writeTo(outputStream)
+            outputStream.flush()
+            outputStream.close()
+        } catch (ex: IOException) {
+            throw IOException("Failed to save bitmap to disk", ex)
+        }
+    }
+
+    private fun takePhoto() {
+        val filename = generateFilename()
+        val view = fragment.arSceneView
+        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val handlerThread = HandlerThread("PixelCopier")
+        handlerThread.start()
+
+        PixelCopy.request(view, bitmap, { copyResult ->
+            if (copyResult == PixelCopy.SUCCESS) {
+                try {
+                    saveBitmapToDisk(bitmap, filename)
+                } catch (e: IOException) {
+                    val toast = Toast.makeText(this, e.toString(), Toast.LENGTH_LONG)
+                    toast.show()
+                }
+
+                val snackbar = Snackbar.make(findViewById(android.R.id.content), "Photo saved", Snackbar.LENGTH_LONG)
+                snackbar.setAction("Open in Photos") {
+                    val photoFile = File(filename)
+                    val photoUri = FileProvider.getUriForFile(this, this.packageName, photoFile)
+                    val intent = Intent(Intent.ACTION_VIEW, photoUri)
+                    intent.setDataAndType(photoUri, "image/*")
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    startActivity(intent)
+                }.show()
+
+            } else {
+                val toast = Toast.makeText(this, ("Failed to copy pixels: $copyResult"), Toast.LENGTH_LONG)
+                toast.show()
+            }
+            handlerThread.quitSafely()
+        }, Handler(handlerThread.looper))
     }
 }
