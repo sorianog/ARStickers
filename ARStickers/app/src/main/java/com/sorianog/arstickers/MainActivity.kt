@@ -47,9 +47,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            takePhoto()
-        }
+        fab.setOnClickListener { takePhoto() }
 
         fragment = supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as ArFragment
         fragment.arSceneView.scene.addOnUpdateListener { frameTime ->
@@ -137,25 +135,25 @@ class MainActivity : AppCompatActivity() {
         val andy = ImageView(this)
         andy.setImageResource(R.drawable.droid_thumb)
         andy.contentDescription = "andy"
-        andy.setOnClickListener { view -> addObject(Uri.parse("andy.sfb")) }
+        andy.setOnClickListener { addObject(Uri.parse("andy.sfb")) }
         gallery.addView(andy)
 
         val cabin = ImageView(this)
         cabin.setImageResource(R.drawable.cabin_thumb)
         cabin.contentDescription = "cabin"
-        cabin.setOnClickListener { view -> addObject(Uri.parse("Cabin.sfb")) }
+        cabin.setOnClickListener { addObject(Uri.parse("Cabin.sfb")) }
         gallery.addView(cabin)
 
         val house = ImageView(this)
         house.setImageResource(R.drawable.house_thumb)
         house.contentDescription = "house"
-        house.setOnClickListener { view -> addObject(Uri.parse("House.sfb")) }
+        house.setOnClickListener { addObject(Uri.parse("House.sfb")) }
         gallery.addView(house)
 
         val igloo = ImageView(this)
         igloo.setImageResource(R.drawable.igloo_thumb)
         igloo.contentDescription = "igloo"
-        igloo.setOnClickListener { view -> addObject(Uri.parse("igloo.sfb")) }
+        igloo.setOnClickListener { addObject(Uri.parse("igloo.sfb")) }
         gallery.addView(igloo)
     }
 
@@ -177,19 +175,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun placeObject(fragment: ArFragment, anchor: Anchor, model: Uri) {
-        val renderableFuture =
-            ModelRenderable.builder()
-                .setSource(fragment.context, model)
-                .build()
-                .thenAccept { renderable -> addNodeToScene(fragment, anchor, renderable) }
-                .exceptionally { throwable ->
-                    val builder = AlertDialog.Builder(this)
-                    builder.setMessage(throwable.message)
-                        .setTitle("Codelab error!")
-                    val dialog = builder.create()
-                    dialog.show()
-                    null
-                };
+        ModelRenderable.builder()
+            .setSource(fragment.context, model)
+            .build()
+            .thenAccept { renderable -> addNodeToScene(fragment, anchor, renderable) }
+            .exceptionally { throwable ->
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage(throwable.message)
+                    .setTitle("Codelab error!")
+                val dialog = builder.create()
+                dialog.show()
+                null
+            }
     }
 
     private fun addNodeToScene(fragment: ArFragment, anchor: Anchor, renderable: Renderable) {
